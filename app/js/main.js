@@ -11,10 +11,7 @@ class Food {
         this.y = Math.floor(Math.random() * 31) * this.height;
 
         snake.tail.forEach(function (item) {
-            // if(item.x === this.x && item.y === this.x){
-            //     this.pickLocation(snake);
-            // }
-            if(snake.colisionDetect(item, snake)){
+            if(snake.colisionDetect(item, this)){
                 this.pickLocation(snake);
             }
         }.bind(this));
