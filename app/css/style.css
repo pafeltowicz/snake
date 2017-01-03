@@ -9,3 +9,9 @@
  **
  * normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css
 */
+canvas {
+  border: solid 1px #000;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); }
