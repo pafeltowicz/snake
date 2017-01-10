@@ -1,5 +1,11 @@
 const GAME_WIDTH = 400;
 const GAME_HEIGHT = 400;
+
+const DIR_LEFT = 0;
+const DIR_RIGHT = 1;
+const DIR_UP = 2;
+const DIR_DOWN = 3;
+
 class Food {
     constructor() {
         this.x = 0;
@@ -12,49 +18,32 @@ class Food {
         this.x = Math.floor(Math.random() * (GAME_WIDTH / 10 - 1)) * this.width;
         this.y = Math.floor(Math.random() * (GAME_HEIGHT / 10 - 1)) * this.height;
 
-        snake.tail.forEach(function (item) {
+        snake.tail.forEach((item) =>{
             if (snake.collisionDetect(item, this) ||
                 this.x >= (GAME_WIDTH - this.width) ||
                 this.y >= (GAME_WIDTH - this.height)) {
                 this.pickLocation(snake);
             }
-        }.bind(this));
-
+        });
     }
 }
 
 class Snake {
     constructor() {
-        this.direction = 1; // 0 - LEFT 1 - RIGHT 2 - UP 3 - DOWN
+        this.direction = DIR_RIGHT;
         this.width = 10;
         this.height = 10;
         this.tail = [
-            {x: 0, y: 40, width: this.width, height: this.height},
-            {x: 20, y: 40, width: this.width, height: this.height},
-            {x: 40, y: 40, width: this.width, height: this.height}
+            {x: 0, y: 40},
+            {x: 20, y: 40},
+            {x: 40, y: 40}
         ];
-        this.food = new Food();
-        this.food.pickLocation(this);
-    }
-
-    wallHack(item) {
-        this.last = this.tail[this.tail.length - 1];
-        if (item.x > GAME_WIDTH) {
-            item.x = 0;
-        }
-        if (item.y > GAME_HEIGHT) {
-            item.y = 0;
-        }
-        if (item.x < 0) {
-            item.x = GAME_WIDTH;
-        }
-        if (item.y < 0) {
-            item.y = GAME_HEIGHT;
-        }
     }
 
     collisionWall(item) {
-        if (item.x > GAME_WIDTH || item.y > GAME_HEIGHT || item.x < 0 || item.y < 0) {
+        if (item.x + this.width > GAME_WIDTH  ||
+            item.y + this.height > GAME_HEIGHT ||
+            item.x < 0 || item.y < 0) {
             return true;
         } else {
             return false;
@@ -63,18 +52,17 @@ class Snake {
 
     direct(lastBall) {
         switch (this.direction) {
-            // 0 - LEFT; 1 - RIGHT; 2 - UP; 3 - DOWN
-            case 0:
-                this.tail.push({x: lastBall.x - this.width, y: lastBall.y, width: this.width, height: this.height});
+            case DIR_LEFT:
+                this.tail.push({x: lastBall.x - this.width, y: lastBall.y});
                 break;
-            case 1:
-                this.tail.push({x: lastBall.x + this.width, y: lastBall.y, width: this.width, height: this.height});
+            case DIR_RIGHT:
+                this.tail.push({x: lastBall.x + this.width, y: lastBall.y});
                 break;
-            case 2:
-                this.tail.push({x: lastBall.x, y: lastBall.y - this.height, width: this.width, height: this.height});
+            case DIR_UP:
+                this.tail.push({x: lastBall.x, y: lastBall.y - this.height});
                 break;
-            case 3:
-                this.tail.push({x: lastBall.x, y: lastBall.y + this.height, width: this.width, height: this.height});
+            case DIR_DOWN:
+                this.tail.push({x: lastBall.x, y: lastBall.y + this.height});
                 break;
             default:
                 break;
@@ -83,10 +71,10 @@ class Snake {
 
     collisionDetect(rect1, rect2) {
 
-        if (rect1.x < rect2.x + rect2.width &&
-            rect1.x + rect1.width > rect2.x &&
-            rect1.y < rect2.y + rect2.height &&
-            rect1.height + rect1.y > rect2.y) {
+        if (rect1.x < rect2.x + this.width &&
+            rect1.x + this.width > rect2.x &&
+            rect1.y < rect2.y + this.height &&
+            this.height + rect1.y > rect2.y) {
             return true;
         } else {
             return false;
@@ -100,13 +88,15 @@ class Snake {
 }
 class App {
     constructor() {
-        this.canvas = document.getElementById('playGround');
-        this.ctx = this.canvas.getContext('2d');
+        this.$canvas = document.getElementById('playGround');
+        this.ctx = this.$canvas.getContext('2d');
         this.frameRate = 10;
         this.score = 0;
         this.snake = new Snake();
-        this.canvas.width = GAME_WIDTH;
-        this.canvas.height = GAME_HEIGHT;
+        this.food = new Food();
+        this.food.pickLocation(this.snake);
+        this.$canvas.width = GAME_WIDTH;
+        this.$canvas.height = GAME_HEIGHT;
         this.draw();
         this.assignEvent();
     }
@@ -119,25 +109,24 @@ class App {
         e.preventDefault();
         let code = e.keyCode;
         switch (code) {
-            // 0 - LEFT; 1 - RIGHT; 2 - UP; 3 - DOWN
             case 37:
-                if (this.snake.direction !== 1) {
-                    this.snake.direction = 0;
+                if (this.snake.direction !== DIR_RIGHT) {
+                    this.snake.direction = DIR_LEFT;
                 }
                 break; //Left key
             case 38:
-                if (this.snake.direction !== 3) {
-                    this.snake.direction = 2;
+                if (this.snake.direction !== DIR_DOWN) {
+                    this.snake.direction = DIR_UP;
                 }
                 break; //Up key
             case 39:
-                if (this.snake.direction !== 0) {
-                    this.snake.direction = 1;
+                if (this.snake.direction !== DIR_LEFT) {
+                    this.snake.direction = DIR_RIGHT;
                 }
                 break; //Right key
             case 40:
-                if (this.snake.direction !== 2) {
-                    this.snake.direction = 3;
+                if (this.snake.direction !== DIR_UP) {
+                    this.snake.direction = DIR_DOWN;
                 }
                 break; //Down key
             default:
@@ -146,33 +135,32 @@ class App {
     }
 
     update(last) {
-        this.snake.tail.forEach(function (item, index) {
+        this.snake.tail.forEach((item, index) => {
             if (index === this.snake.tail.length - 1) {
                 //HEAD
-                this.ctx.fillStyle = "green"
+                this.ctx.fillStyle = "green";
             } else {
                 //BODY
-                this.ctx.fillStyle = "#000"
+                this.ctx.fillStyle = "#000";
             }
             this.ctx.fillRect(item.x, item.y, this.snake.width, this.snake.height);
 
-            if (this.snake.collisionDetect(last, this.snake.food)) {
+            if (this.snake.collisionDetect(last, this.food)) {
                 this.score++;
                 this.snake.insert();
-                this.snake.food.pickLocation(this.snake);
+                this.food.pickLocation(this.snake);
             }
 
-            // this.snake.wallHack(item);
-
             //Collision wall or "canibal snake"
-            if (item.x === this.last.x && item.y === this.last.y && index < this.snake.tail.length - 2 || this.snake.collisionWall(item)) {
+            if (item.x === this.last.x && item.y === this.last.y &&
+                index < this.snake.tail.length - 2 ||
+                this.snake.collisionWall(item)) {
                 //Game over
                 alert("Gameover! Twój wynik to: " + this.score + " PTK" );
                 // New Game
-                this.score = 0;
-                this.snake = new Snake();
+                this.resetGame();
             }
-        }.bind(this));
+        });
     }
 
     show() {
@@ -187,15 +175,32 @@ class App {
         this.update(this.last);
 
         this.ctx.fillStyle = "red";
-        this.ctx.fillRect(this.snake.food.x, this.snake.food.y, this.snake.food.width, this.snake.food.height);
+        this.ctx.fillRect(
+            this.food.x,
+            this.food.y,
+            this.food.width,
+            this.food.height
+        );
     }
 
     draw() {
-        window.setTimeout(() => window.requestAnimationFrame(this.draw.bind(this)), 1000 / this.frameRate);
+        window.setTimeout(() =>
+            window.requestAnimationFrame(this.draw.bind(this)), 1000 / this.frameRate);
         this.show();
+    }
+
+    resetGame(){
+        this.snake = new Snake();
+        this.score = 0;
+        this.food.pickLocation(this.snake);
     }
 }
 
-new App();
+(function () {
+    new App();
+}());
+
+
+
 
 

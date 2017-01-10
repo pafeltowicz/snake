@@ -4,6 +4,7 @@
   "description": "STARTER-PACK Gulp+Bower+Sass+Browser-sync+Wiredep",
   "main": "gulpfile.js",
   "scripts": {
+    "start": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
