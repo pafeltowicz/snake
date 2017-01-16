@@ -6,6 +6,8 @@ const DIR_RIGHT = 1;
 const DIR_UP = 2;
 const DIR_DOWN = 3;
 
+const FRAME_RATE = 1000 / 10;
+
 class Food {
     constructor() {
         this.x = 0;
@@ -18,7 +20,7 @@ class Food {
         this.x = Math.floor(Math.random() * (GAME_WIDTH / 10 - 1)) * this.width;
         this.y = Math.floor(Math.random() * (GAME_HEIGHT / 10 - 1)) * this.height;
 
-        snake.tail.forEach((item) =>{
+        snake.tail.forEach((item) => {
             if (snake.collisionDetect(item, this) ||
                 this.x >= (GAME_WIDTH - this.width) ||
                 this.y >= (GAME_WIDTH - this.height)) {
@@ -41,14 +43,11 @@ class Snake {
     }
 
     collisionWall(item) {
-        if (item.x + this.width > GAME_WIDTH  ||
-            item.y + this.height > GAME_HEIGHT ||
-            item.x < 0 || item.y < 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (item.x + this.width > GAME_WIDTH ||
+        item.y + this.height > GAME_HEIGHT ||
+        item.x < 0 || item.y < 0)
     }
+
 
     direct(lastBall) {
         switch (this.direction) {
@@ -70,15 +69,10 @@ class Snake {
     }
 
     collisionDetect(rect1, rect2) {
-
-        if (rect1.x < rect2.x + this.width &&
-            rect1.x + this.width > rect2.x &&
-            rect1.y < rect2.y + this.height &&
-            this.height + rect1.y > rect2.y) {
-            return true;
-        } else {
-            return false;
-        }
+        return (rect1.x < rect2.x + this.width &&
+        rect1.x + this.width > rect2.x &&
+        rect1.y < rect2.y + this.height &&
+        this.height + rect1.y > rect2.y);
     }
 
     insert() {
@@ -90,13 +84,16 @@ class App {
     constructor() {
         this.$canvas = document.getElementById('playGround');
         this.ctx = this.$canvas.getContext('2d');
-        this.frameRate = 10;
         this.score = 0;
         this.snake = new Snake();
         this.food = new Food();
         this.food.pickLocation(this.snake);
         this.$canvas.width = GAME_WIDTH;
         this.$canvas.height = GAME_HEIGHT;
+        this.colisionSnake = function (item, index, last) {
+            return item.x === last.x && item.y === last.y &&
+                index < this.snake.tail.length - 2;
+        };
         this.draw();
         this.assignEvent();
     }
@@ -152,11 +149,10 @@ class App {
             }
 
             //Collision wall or "canibal snake"
-            if (item.x === this.last.x && item.y === this.last.y &&
-                index < this.snake.tail.length - 2 ||
+            if (this.colisionSnake(item, index, last) ||
                 this.snake.collisionWall(item)) {
                 //Game over
-                alert("Gameover! Twój wynik to: " + this.score + " PTK" );
+                alert("Gameover! Twój wynik to: " + this.score + " PTK");
                 // New Game
                 this.resetGame();
             }
@@ -165,15 +161,11 @@ class App {
 
     show() {
         this.snake.insert();
-
         this.snake.tail.shift();
-
         this.ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         this.ctx.beginPath();
-
         this.last = this.snake.tail[this.snake.tail.length - 1];
         this.update(this.last);
-
         this.ctx.fillStyle = "red";
         this.ctx.fillRect(
             this.food.x,
@@ -185,20 +177,18 @@ class App {
 
     draw() {
         window.setTimeout(() =>
-            window.requestAnimationFrame(this.draw.bind(this)), 1000 / this.frameRate);
+            window.requestAnimationFrame(this.draw.bind(this)), FRAME_RATE);
         this.show();
     }
 
-    resetGame(){
+    resetGame() {
         this.snake = new Snake();
         this.score = 0;
         this.food.pickLocation(this.snake);
     }
 }
 
-(function () {
-    new App();
-}());
+window.addEventListener('load', () => new App(), false);
 
 
 
