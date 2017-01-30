@@ -1,5 +1,8 @@
-Game Snake Vanilla JS
+# Game Snake Vanilla JS
 
-Usage:
+## Live preview
+https://przemyslaw-afeltowicz.github.io/snake/app
+
+## Developer Usage:
  1. npm install
  2. npm start
